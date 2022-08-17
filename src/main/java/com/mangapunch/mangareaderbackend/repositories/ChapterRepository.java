@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.mangapunch.mangareaderbackend.models.Chapter;
 
 @Repository
-public interface ChapterReporitory extends JpaRepository<Chapter, Long>{
+public interface ChapterRepository extends JpaRepository<Chapter, Long>{
 
 }

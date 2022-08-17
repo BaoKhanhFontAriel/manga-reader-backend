@@ -51,11 +51,11 @@ public class Chapter {
     private int views;
 
     
-    @Column(name = "uploadDate")
+    @Column(name = "uploaddate")
     private Date uploadedDate;
 
-    @Column(name = "uploadTime")
-    private String uploadedTime;
+    @Column(name = "uploadtime")
+    private Time uploadedTime;
 
     @ManyToOne
     @JoinColumn(name="uploaderId")

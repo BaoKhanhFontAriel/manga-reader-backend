@@ -1,46 +1,34 @@
 package com.mangapunch.mangareaderbackend.service;
 
 import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.mangapunch.mangareaderbackend.models.Chapter;
-import com.mangapunch.mangareaderbackend.repositories.ChapterReporitory;
+import com.mangapunch.mangareaderbackend.repositories.ChapterRepository;
 
 public class ChapterServiceImpl implements ChapterService{
-    private ChapterReporitory  chapterRepository;
+    @Autowired
+    private ChapterRepository chapterRepository;
 
     @Override
-    public List<Chapter> getAllChapter() {
-        // TODO Auto-generated method stub
-        return null;
+    public List<Chapter> getAllChapters() {
+        return chapterRepository.findAll();
     }
 
     @Override
-    public Chapter createChapter() {
-        // TODO Auto-generated method stub
-        return null;
+    public void addChapter(Chapter chapter) {
+        chapterRepository.save(chapter);
     }
 
     @Override
-    public Chapter getChapterByid(Long id) {
-        // TODO Auto-generated method stub
-        return null;
+    public Optional<Chapter> getChapterByid(Long chapterId) {
+        return chapterRepository.findById(chapterId);
     }
 
     @Override
-    public Chapter deleteChapter(Long id) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Chapter updateChapter(Long is) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    private int totalViews = 0;
-    public int getTotalViews(){
-        chapterRepository.findAll().stream().forEach((chapter) -> totalViews += chapter.getViews());
-        return totalViews;
+    public void deleteChapter(Long chapterId) {
+        chapterRepository.deleteById(chapterId);
     }
 }

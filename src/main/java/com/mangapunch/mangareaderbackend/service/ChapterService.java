@@ -1,13 +1,16 @@
 package com.mangapunch.mangareaderbackend.service;
 
 import java.util.List;
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
 
 import com.mangapunch.mangareaderbackend.models.Chapter;
 
+@Service
 public interface ChapterService{
-    List<Chapter> getAllChapter();
-    Chapter createChapter();
-    Chapter getChapterByid(Long id);
-    Chapter deleteChapter(Long id);
-    Chapter updateChapter(Long is);
+    List<Chapter> getAllChapters();
+    void addChapter(Chapter chapter);
+    Optional<Chapter> getChapterByid(Long chapterId);
+    void deleteChapter(Long chapterId);
 }

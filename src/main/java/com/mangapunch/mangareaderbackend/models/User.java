@@ -25,12 +25,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "user_data")
+@Table(name = "users_data")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
-    @Column(name = "name")
+    @Column(name = "fullname")
     private String name;
     @Column(name = "email")
     private String email;
