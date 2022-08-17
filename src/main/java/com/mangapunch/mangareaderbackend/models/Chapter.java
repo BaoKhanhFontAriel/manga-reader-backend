@@ -1,11 +1,23 @@
 package com.mangapunch.mangareaderbackend.models;
 
+import java.sql.Date;
+import java.sql.Time;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Calendar;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.springframework.stereotype.Component;
 
@@ -19,14 +31,33 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Table(name = "chapter_data")
 public class Chapter {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private String id;
+    private long id;
+
+    @Column(name = "title")
     private String title;
-    private String mangaId;
-    private List<Page> pages;
+
+    @ManyToOne
+    @JoinColumn(name = "mangaId")
+    private Manga manga;
+
+    @Column(name ="pageUrls")
+    private String pageUrls;
+
+    @Column(name = "views")
     private int views;
-    private LocalDate uploadedTime;
-    private String uploaderId;
+
+    
+    @Column(name = "uploadDate")
+    private Date uploadedDate;
+
+    @Column(name = "uploadTime")
+    private String uploadedTime;
+
+    @ManyToOne
+    @JoinColumn(name="uploaderId")
+    private User uploader;
 }

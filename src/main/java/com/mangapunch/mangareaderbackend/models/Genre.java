@@ -1,26 +1,38 @@
 package com.mangapunch.mangareaderbackend.models;
 
-public enum Genre {
-    ACTION("Action"),
-    ADVENTURE("Adventure"),
-    TRAGEDY("Tragedy"),
-    COMEDY("Comedy"),
-    FANTASY("Fantasy"),
-    HORROR("Horror"),
-    MYSTERY("Mystery"),
-    SHOUNEN("Shounen"),
-    SHOUJO("Shoujo"),
-    HISTORICAL("Historical"),
-    SLICE_OF_LIFE("Slice of Life");
+import java.util.List;
 
-    private Genre(String value) {
-        this.value = value;
-    }
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
+import javax.persistence.Table;
 
-    private String value;
+import org.hibernate.annotations.ManyToAny;
 
-    public String getValue() {
-        return value;
-    }
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Entity
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "genre_data")
+public class Genre {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private long id;
+
+    @Column(name = "genre")
+    @Enumerated(EnumType.STRING)
+    private Genres genre;
+
+    @ManyToMany(mappedBy = "genres")
+    private List<Manga> mangas;
 }
