@@ -42,7 +42,7 @@ public class Manga {
     @Column(name = "title", unique = true)
     private String title;
 
-    @Column(name = "thumbnailUrl")
+    @Column(name = "thumbnailurl")
     private String thumbnailUrl;
 
     @Column(name = "author")
