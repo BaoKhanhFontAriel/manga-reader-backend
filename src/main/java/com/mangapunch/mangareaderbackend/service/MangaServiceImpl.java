@@ -1,13 +1,12 @@
 package com.mangapunch.mangareaderbackend.service;
 
-import java.util.List;
-import java.util.Optional;
-
+import com.mangapunch.mangareaderbackend.models.Manga;
+import com.mangapunch.mangareaderbackend.repositories.MangaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.mangapunch.mangareaderbackend.models.Manga;
-import com.mangapunch.mangareaderbackend.repositories.MangaRepository;
+import java.util.List;
+import java.util.Optional;
 
 @Component
 public class MangaServiceIml implements MangaService {
@@ -32,6 +31,10 @@ public class MangaServiceIml implements MangaService {
     @Override
     public void deleteManga(Long mangaId) {
         mangaRepository.deleteById(mangaId);
-
     }
+
+//    @Override
+//    public List<Manga> findTop5MangasWithMostViews() {
+//        return mangaRepository.findTop5MangasWithMostViews();
+//    }
 }
