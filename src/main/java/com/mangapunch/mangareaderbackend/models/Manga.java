@@ -1,31 +1,10 @@
 package com.mangapunch.mangareaderbackend.models;
 
-import java.util.ArrayList;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
+
+import javax.persistence.*;
 import java.util.List;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinColumns;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.mangapunch.mangareaderbackend.service.ChapterService;
-import com.mangapunch.mangareaderbackend.service.ChapterServiceImpl;
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
 
 @Entity
 @Data
@@ -48,20 +27,27 @@ public class Manga {
     @Column(name = "author")
     private String author;
 
-    @ManyToMany
-    @JoinTable(name = "manga_genre_data", joinColumns = @JoinColumn(name = "manga_id"), inverseJoinColumns = @JoinColumn(name = "genre_id"))
+    @JsonIgnore
+    @ManyToMany()
+    @JoinTable(name = "manga_genres_data", joinColumns = @JoinColumn(name = "manga_id"), inverseJoinColumns = @JoinColumn(name = "genre_id"))
     private List<Genre> genres;
 
-    @ManyToMany
+    @JsonIgnore
+    @ManyToMany()
     @JoinTable(name = "favorite_data", joinColumns = @JoinColumn(name = "manga_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private List<Manga> favorites;
+    private List<User> userFavorites;
 
     @Column(name = "summary")
     private String summary;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "manga")
     private List<Chapter> chapters;
 
+    @JsonIgnore
+    @ManyToOne()
+    @JoinColumn(name="uploader")
+    private User uploader;
 
 
     // @Transient

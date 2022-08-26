@@ -1,13 +1,14 @@
 package com.mangapunch.mangareaderbackend.service;
 
+import com.mangapunch.mangareaderbackend.models.Chapter;
+import com.mangapunch.mangareaderbackend.repositories.ChapterRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.mangapunch.mangareaderbackend.models.Chapter;
-import com.mangapunch.mangareaderbackend.repositories.ChapterRepository;
-
+@Component
 public class ChapterServiceImpl implements ChapterService{
     @Autowired
     private ChapterRepository chapterRepository;
@@ -30,5 +31,22 @@ public class ChapterServiceImpl implements ChapterService{
     @Override
     public void deleteChapter(Long chapterId) {
         chapterRepository.deleteById(chapterId);
+    }
+
+    @Override
+    public Chapter getLatestChapterByMangaId(long id){
+        return chapterRepository.findLatestChapterByMangaId(id);
+    }
+
+    @Override
+    public List<Chapter> findByMangaId(long mangaId) {
+        return chapterRepository.findByMangaId(mangaId);
+    }
+
+    @Override
+    public Chapter findChapterById(long id) {
+        Chapter chapter = chapterRepository.findById(id).get();
+
+        return chapter;
     }
 }

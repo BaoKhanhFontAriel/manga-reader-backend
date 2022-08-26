@@ -1,6 +1,6 @@
 package com.mangapunch.mangareaderbackend.models;
 
-public enum Genres {
+public enum GenreEnum {
     ACTION("Action"),
     ADVENTURE("Adventure"),
     TRAGEDY("Tragedy"),
@@ -13,7 +13,7 @@ public enum Genres {
     HISTORICAL("Historical"),
     SLICE_OF_LIFE("Slice of Life");
 
-    private Genres(String value) {
+    private GenreEnum(String value) {
         this.value = value;
     }
 

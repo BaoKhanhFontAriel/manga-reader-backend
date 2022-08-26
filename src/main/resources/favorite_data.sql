@@ -1,6 +1,6 @@
 create table favorite_data (
-	user_id INT,
-	manga_id INT
+	user_id BIGINT(20),
+	manga_id BIGINT(20)
 );
 insert into favorite_data (user_id, manga_id) values (82, 94);
 insert into favorite_data (user_id, manga_id) values (59, 86);

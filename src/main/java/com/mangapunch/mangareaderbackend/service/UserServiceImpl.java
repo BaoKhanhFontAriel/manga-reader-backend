@@ -1,13 +1,14 @@
 package com.mangapunch.mangareaderbackend.service;
 
+import com.mangapunch.mangareaderbackend.models.User;
+import com.mangapunch.mangareaderbackend.repositories.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.mangapunch.mangareaderbackend.models.User;
-import com.mangapunch.mangareaderbackend.repositories.UserRepository;
-
+@Component
 public class UserServiceImpl implements UserService {
 
     @Autowired

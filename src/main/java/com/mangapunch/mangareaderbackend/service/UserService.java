@@ -1,10 +1,10 @@
+package com.mangapunch.mangareaderbackend.service;
+
+import com.mangapunch.mangareaderbackend.models.User;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-
-import org.springframework.stereotype.Service;
-
-import com.mangapunch.mangareaderbackend.models.User;
 
 @Service
 public interface UserService {

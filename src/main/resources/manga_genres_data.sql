@@ -1,6 +1,6 @@
 create table manga_genres_data (
-	manga_id VARCHAR(50),
-	genre_id INT
+	manga_id BIGINT(20),
+	genre_id BIGINT(20)
 );
 insert into manga_genres_data (manga_id, genre_id) values (1, 2);
 insert into manga_genres_data (manga_id, genre_id) values (2, 9);

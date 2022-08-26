@@ -1,30 +1,15 @@
 package com.mangapunch.mangareaderbackend.models;
 
-import java.sql.Date;
-import java.sql.Time;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.Calendar;
-import java.util.List;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-
-import org.springframework.stereotype.Component;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import javax.persistence.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.function.BooleanSupplier;
 
 @Entity
 @Data
@@ -40,24 +25,30 @@ public class Chapter {
     @Column(name = "title")
     private String title;
 
+    @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "mangaId")
+    @JoinColumn(name = "mangaid")
     private Manga manga;
 
-    @Column(name ="pageUrls")
+    @Column(name ="pageurls")
     private String pageUrls;
 
     @Column(name = "views")
     private int views;
 
     
-    @Column(name = "uploaddate")
-    private Date uploadedDate;
+    @Column(name = "uploaddate", columnDefinition = "DATE")
+    private LocalDate uploadedDate;
 
-    @Column(name = "uploadtime")
-    private Time uploadedTime;
+    @Column(name = "uploadtime", columnDefinition = "TIME")
+    private LocalTime uploadedTime;
 
+    @JsonIgnore
     @ManyToOne
-    @JoinColumn(name="uploaderId")
+    @JoinColumn(name="uploaderid")
     private User uploader;
+
+    public BooleanSupplier isNotNull() {
+        return null;
+    }
 }

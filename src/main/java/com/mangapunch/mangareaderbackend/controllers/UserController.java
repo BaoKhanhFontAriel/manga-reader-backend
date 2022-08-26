@@ -1,25 +1,18 @@
 package com.mangapunch.mangareaderbackend.controllers;
 
-import javax.validation.Valid;
-
+import com.mangapunch.mangareaderbackend.dto.UserRequest;
+import com.mangapunch.mangareaderbackend.models.User;
+import com.mangapunch.mangareaderbackend.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.mangapunch.mangareaderbackend.dto.UserRequest;
-import com.mangapunch.mangareaderbackend.models.User;
-import com.mangapunch.mangareaderbackend.service.UserService;
+import javax.validation.Valid;
+import java.util.Optional;
 
-@RequestMapping("/users")
+@RequestMapping("/api/users")
 @RestController
 public class UserController {
     
