@@ -3,6 +3,8 @@ package com.mangapunch.mangareaderbackend.controllers;
 import com.mangapunch.mangareaderbackend.dto.ChapterRequest;
 import com.mangapunch.mangareaderbackend.models.Chapter;
 import com.mangapunch.mangareaderbackend.service.ChapterService;
+
+import org.hibernate.cfg.IdGeneratorResolverSecondPass;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
@@ -10,6 +12,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -72,6 +77,15 @@ public class ChapterController {
         String[] pages = chapter.getPageUrls().split(" ");
         return pages;
     }
+
+    
+    @GetMapping("/{id}/uploaded-datetime")
+    public String getUploadedDateTimeByChapterId(@PathVariable("id") long id){
+        Chapter chapter = chapterService.findChapterById(id);
+        LocalDateTime datetime = LocalDateTime.of(chapter.getUploadedDate(), chapter.getUploadedTime());
+        String datetimeStr = datetime.format(DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy")).toString();
+        return datetimeStr;
+    };
 
     // @GetMapping("/{mangaId}/chapter")
     // List<Chapter> findByMangaId(@PathVariable("mangaid") long mangaId){

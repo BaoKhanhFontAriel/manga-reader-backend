@@ -27,7 +27,7 @@ public class Chapter {
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "mangaid")
+    @JoinColumn(name = "mangaid", nullable = false,insertable = false, updatable = false)
     private Manga manga;
 
     @Column(name ="pageurls")

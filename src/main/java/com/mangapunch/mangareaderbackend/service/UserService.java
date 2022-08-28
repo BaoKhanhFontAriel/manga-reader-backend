@@ -12,4 +12,5 @@ public interface UserService {
     void addUser(User User);
     Optional<User> getUserByid(Long UserId);
     void deleteUser(Long UserId);
+    User findByUsernameOrEmail(String username, String email);
 }

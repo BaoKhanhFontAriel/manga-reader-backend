@@ -7,5 +7,5 @@ import com.mangapunch.mangareaderbackend.models.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long>{
-    
+    User findByUsernameOrEmail(String username, String email);
 }

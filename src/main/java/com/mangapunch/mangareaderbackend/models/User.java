@@ -1,8 +1,6 @@
 package com.mangapunch.mangareaderbackend.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,12 +33,11 @@ public class User {
     private List<Chapter> uploadChapters;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "uploader")
-    private List<Manga> uploadMangas;
-
-    @JsonIgnore
     @ManyToMany(mappedBy = "userFavorites")
     private List<Manga> favoriteManga;
 
-
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "role_id")
+    private Role role;
 }

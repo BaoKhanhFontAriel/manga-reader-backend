@@ -43,26 +43,4 @@ public class Manga {
     @JsonIgnore
     @OneToMany(mappedBy = "manga")
     private List<Chapter> chapters;
-
-    @JsonIgnore
-    @ManyToOne()
-    @JoinColumn(name="uploader")
-    private User uploader;
-
-
-    // @Transient
-    // private int views;
-    // public int getViews(){
-    //     return chapterService.getTotalViews();
-    // }
-
-    // public Manga(long id, String title, String thumbnailUrl, String author, List<Genre> genres, String summary) {
-    //     this.id = id;
-    //     this.title = title;
-    //     this.thumbnailUrl = thumbnailUrl;
-    //     this.author = author;
-    //     this.genres = genres;
-    //     this.summary = summary;
-    //     this.chapters = new ArrayList<>();
-    // }
 }

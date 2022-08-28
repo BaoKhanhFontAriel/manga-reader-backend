@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-public class ChapterServiceImpl implements ChapterService{
+public class ChapterServiceImpl implements ChapterService {
     @Autowired
     private ChapterRepository chapterRepository;
 
@@ -34,13 +34,13 @@ public class ChapterServiceImpl implements ChapterService{
     }
 
     @Override
-    public Chapter getLatestChapterByMangaId(long id){
+    public Chapter getLatestChapterByMangaId(long id) {
         return chapterRepository.findLatestChapterByMangaId(id);
     }
 
     @Override
     public List<Chapter> findByMangaId(long mangaId) {
-        return chapterRepository.findByMangaId(mangaId);
+        return chapterRepository.findByMangaIdOrderByTitleDesc(mangaId);
     }
 
     @Override

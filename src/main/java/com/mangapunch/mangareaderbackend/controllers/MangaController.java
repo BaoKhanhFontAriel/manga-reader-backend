@@ -48,7 +48,7 @@ public class MangaController {
     }
 
     // Xử lý request "/mangas" có method POST
-    @PostMapping(value = "/add", consumes = { "multipart/form-data" })
+    @PostMapping(value = "/update", consumes = { "multipart/form-data" })
     public String addManga(@Valid @ModelAttribute("mangaForm") MangaRequest mangaRequest, BindingResult bindingResult,
             Model model) {
         Manga manga = modelMapper.map(mangaRequest, Manga.class);
@@ -117,4 +117,5 @@ public class MangaController {
     List<Chapter> findChapterByMangaId(@PathVariable("id") long mangaId){
         return chapterService.findByMangaId(mangaId);
     };
+
 }
