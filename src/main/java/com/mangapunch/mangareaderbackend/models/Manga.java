@@ -14,7 +14,7 @@ import java.util.List;
 @Table(name = "manga_data")
 public class Manga {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @NonNull

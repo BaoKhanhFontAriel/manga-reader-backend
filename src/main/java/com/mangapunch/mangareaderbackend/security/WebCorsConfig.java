@@ -12,6 +12,9 @@ public class WebCorsConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**") // Cho phép tất cả các đường dẫn
                 .allowedOrigins("http://localhost:8081")
-                .allowCredentials(false).maxAge(3600);
+                .allowedMethods("HEAD", "OPTIONS", "GET", "POST", "PUT", "PATCH", "DELETE")
+                .allowedHeaders("authorization", "content-type", "x-auth-token")
+                .exposedHeaders("x-auth-token")
+                .maxAge(3600);
     }
 }

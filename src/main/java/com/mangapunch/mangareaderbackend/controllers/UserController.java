@@ -1,21 +1,10 @@
 package com.mangapunch.mangareaderbackend.controllers;
 
-import com.mangapunch.mangareaderbackend.dto.UserRequest;
-import com.mangapunch.mangareaderbackend.models.Role;
-import com.mangapunch.mangareaderbackend.models.RoleEnum;
+import com.mangapunch.mangareaderbackend.dto.SignupRequest;
 import com.mangapunch.mangareaderbackend.models.User;
-import com.mangapunch.mangareaderbackend.service.JwtUserDetailService;
 import com.mangapunch.mangareaderbackend.service.UserService;
-import com.mangapunch.mangareaderbackend.utils.JwtTokenUtil;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +15,7 @@ import java.util.Optional;
 @RequestMapping("/api/users")
 @RestController
 public class UserController {
-    
+
     @Autowired
     private UserService userService;
     @Autowired
@@ -50,13 +39,13 @@ public class UserController {
     // add new User
     @GetMapping("/add")
     public String showAddUserForm(Model model) {
-        model.addAttribute("UserForm", new UserRequest());
+        model.addAttribute("UserForm", new SignupRequest());
         return "add-User";
     }
 
     // Xử lý request "/Users" có method POST
     @PostMapping(value = "/add", consumes = { "multipart/form-data" })
-    public String addUser(@Valid @ModelAttribute("UserForm") UserRequest UserRequest, BindingResult bindingResult,
+    public String addUser(@Valid @ModelAttribute("UserForm") SignupRequest UserRequest, BindingResult bindingResult,
             Model model) {
         User User = modelMapper.map(UserRequest, User.class);
         userService.addUser(User);
@@ -80,33 +69,5 @@ public class UserController {
 
         return "redirect:/Users";
 
-    }
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private JwtTokenUtil jwtTokenUtil;
-
-
-    @PostMapping("/authenticate")
-    public ResponseEntity<?> login(@Valid @RequestBody UserRequest userReq) {
-        // Xác thực từ username và password.
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        userReq.getEmail(),
-                        userReq.getPassword()
-                )
-        );
-
-        // Nếu không xảy ra exception tức là thông tin hợp lệ
-        // Set thông tin authentication vào Security Context
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        User user = userService.findByUsernameOrEmail(userReq.getEmail(), userReq.getEmail());
-        // Gen token
-        String token = jwtTokenUtil.generateToken((UserDetails) authentication.getPrincipal(), user.getRole());
-
-        return ResponseEntity.ok(token);
     }
 }

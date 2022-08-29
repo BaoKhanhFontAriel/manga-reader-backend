@@ -19,7 +19,7 @@ import java.util.function.BooleanSupplier;
 @Table(name = "chapter_data")
 public class Chapter {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @Column(name = "title")

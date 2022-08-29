@@ -2,8 +2,10 @@ package com.mangapunch.mangareaderbackend.test;
 
 import com.mangapunch.mangareaderbackend.models.Chapter;
 import com.mangapunch.mangareaderbackend.models.Manga;
+import com.mangapunch.mangareaderbackend.models.User;
 import com.mangapunch.mangareaderbackend.service.ChapterService;
 import com.mangapunch.mangareaderbackend.service.MangaService;
+import com.mangapunch.mangareaderbackend.service.UserService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,9 @@ public class MangaQueryTest {
 
     @Autowired
     private ChapterService chapterService;
+
+    @Autowired
+    private UserService userService;
 
     // test if query the latest chapter of desired manga works
     @Test
@@ -74,5 +79,12 @@ public class MangaQueryTest {
     public void findChapterById(){
         Chapter chapter = chapterService.findChapterById(1);
         assertTrue(chapter.isNotNull());
+    }
+
+    @Test
+    public void findUserByUsernameOrEmail(){
+        User user = userService.findByUsernameOrEmail("khanhadmin","khanhadmin");
+        assertTrue(user != null);
+        assertThat(user.getUsername()).isEqualTo("khanhadmin");
     }
 }
