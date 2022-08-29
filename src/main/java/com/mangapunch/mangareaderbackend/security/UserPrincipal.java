@@ -15,7 +15,7 @@ import java.util.Collection;
 @NoArgsConstructor
 @Getter
 @Setter
-public class CustomUserDetails implements UserDetails {
+public class UserPrincipal implements UserDetails {
     private User user;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
