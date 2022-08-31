@@ -30,8 +30,6 @@ public interface MangaService {
 
     List<Manga> getAllMangaListByUpdate(int page);
 
-    List<Manga> getFavoriteMangaByUsername(String username);
 
-    boolean isMangaFavoritedByUser(long mangaid, long userid);
 
 }

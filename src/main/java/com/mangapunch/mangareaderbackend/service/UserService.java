@@ -27,7 +27,12 @@ public interface UserService {
 
     User updateUser(long id, User user);
 
-    List<Manga> addMangaToFavorite(long mangaid, long userid);
-    List<Manga> removeMangaToFavorite(long mangaid, long userid);
+    List<Manga> addMangaToFavorite(long mangaid, String username);
+
+    List<Manga> removeMangaToFavorite(long mangaid, String username);
+
+    boolean isMangaFavoritedByUser(long mangaid, String username);
+
+    List<Manga> getFavoriteMangaByUsername(String username);
 
 }

@@ -2,6 +2,7 @@ package com.mangapunch.mangareaderbackend.service;
 
 import com.mangapunch.mangareaderbackend.models.Manga;
 import com.mangapunch.mangareaderbackend.models.User;
+import com.mangapunch.mangareaderbackend.repositories.MangaRepository;
 import com.mangapunch.mangareaderbackend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private MangaService mangaService;
+
+    @Autowired
+    private MangaRepository mangaRepository;
 
     @Override
     public List<User> getAllUsers() {
@@ -73,8 +77,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<Manga> addMangaToFavorite(long mangaid, long userid) {
-        User user = userRepository.findById(userid);
+    public List<Manga> addMangaToFavorite(long mangaid, String username) {
+        User user = userRepository.findByUsername(username);
         Manga manga = mangaService.findById(mangaid);
         user.getFavoriteManga().add(manga);
         manga.getUserFavorites().add(user);
@@ -83,12 +87,27 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<Manga> removeMangaToFavorite(long mangaid, long userid) {
-        User user = userRepository.findById(userid);
+    public List<Manga> removeMangaToFavorite(long mangaid, String username) {
+        User user = userRepository.findByUsername(username);
         Manga manga = mangaService.findById(mangaid);
         user.getFavoriteManga().remove(manga);
         manga.getUserFavorites().remove(user);
         userRepository.saveAndFlush(user);
         return user.getFavoriteManga();
     };
+
+    // check if a user has favorited a manga,
+    // query return 0 meaning manga is not favorited, return 1 meaning manga is
+    // favorited
+    @Override
+    public boolean isMangaFavoritedByUser(long mangaid, String username) {
+        return userRepository.isMangaFavoritedByUser(mangaid, username) == 1;
+    };
+
+    @Override
+    public List<Manga> getFavoriteMangaByUsername(String username) {
+        return userRepository.getFavoriteMangaByUser(username);
+    }
+
+
 }

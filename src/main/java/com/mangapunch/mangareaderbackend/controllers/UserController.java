@@ -77,43 +77,25 @@ public class UserController {
     }
 
     @GetMapping("/add-favorite")
-    public List<Manga> addMangaToFavorite(@RequestParam long userid, @RequestParam long mangaid) {
-        return userService.addMangaToFavorite(mangaid, userid);
+    public List<Manga> addMangaToFavorite(@RequestParam String username, @RequestParam long mangaid) {
+        return userService.addMangaToFavorite(mangaid, username);
     }
 
     @GetMapping("/remove-favorite")
-    public List<Manga> removeMangaToFavorite(@RequestParam long userid, @RequestParam long mangaid) {
-        return userService.removeMangaToFavorite(mangaid, userid);
+    public List<Manga> removeMangaToFavorite(@RequestParam String username, @RequestParam long mangaid) {
+        return userService.removeMangaToFavorite(mangaid, username);
     }
 
-    // @GetMapping("/{username}/favorites")
-    // public ResponseEntity<?> getFavoriteMangaByUserId(@PathVariable("username")
-    // String username) {
-    // try {
-    // Authentication authentication = authenticationManager.authenticate(
-    // new UsernamePasswordAuthenticationToken(
-    // username));
-
-    // SecurityContextHolder.getContext().setAuthentication(authentication);
-    // UserPrincipal user = (UserPrincipal) authentication.getPrincipal();
-    // if (userPrincipal.getUsername() == username) {
-    // return
-    // ResponseEntity.status(HttpStatus.OK).body(mangaService.getFavoriteMangaByUsername(username));
-    // }
-
-    // else {
-    // throw new SecurityException();
-    // }
-
-    // } catch (Exception e) {
-    // return ResponseEntity.status(HttpStatus.FORBIDDEN)
-    // .body("You are not authorized to access data: " + e.getMessage());
-    // }
-    // };
+    // check if the manga is favorited by user
+    @GetMapping("/is-favorited")
+    public boolean isMangaFavoritedByUser(@RequestParam("mangaid") long mangaid,
+            @RequestParam("username") String username) {
+        return userService.isMangaFavoritedByUser(mangaid, username);
+    };
 
     // @PreAuthorize("#username == principal.username")
     @GetMapping("/{username}/favorites")
     public ResponseEntity<?> getFavoriteMangaByUserId(@PathVariable("username") String username) {
-        return ResponseEntity.status(HttpStatus.OK).body(mangaService.getFavoriteMangaByUsername(username));
+        return ResponseEntity.status(HttpStatus.OK).body(userService.getFavoriteMangaByUsername(username));
     };
 }

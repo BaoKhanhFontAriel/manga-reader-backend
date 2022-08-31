@@ -63,13 +63,5 @@ public interface MangaRepository extends JpaRepository<Manga, Long> {
         @Query("select m.chapters from Manga m where m.id = :mangaid")
         List<Chapter> getAllChaptersByMangaId(long mangaid);
 
-        @Query("select u.favoriteManga from User u where u.username = :username")
-        List<Manga> getFavoriteMangaByUserId(String username);
 
-        // check if a user has favorited a manga,
-        // query return 0 meaning manga is not favorited, return 1 meaning manga is
-        // favorited
-        @Query("select count(m) from Manga m join m.userFavorites u " +
-                        "where m.id = :mangaid and u.id = :userid")
-        int isMangaFavoritedByUser(long mangaid, long userid);
 }

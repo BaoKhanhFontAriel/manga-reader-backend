@@ -125,10 +125,6 @@ public class MangaController {
         return chapterService.findByMangaId(mangaId);
     };
 
-    @GetMapping("/is-favorited")
-    public boolean isMangaFavoritedByUser(@RequestParam("mangaid") long mangaid,@RequestParam("userid") long userid){
-        return mangaService.isMangaFavoritedByUser(mangaid, userid);
-    };
 
 
 }
