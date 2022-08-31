@@ -17,6 +17,7 @@ import java.util.Collection;
 public class JwtUserDetailService implements UserDetailsService {
     @Autowired
     private UserService userService;
+
     @Override
     public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
         User user = userService.findByUsernameOrEmail(usernameOrEmail,usernameOrEmail);

@@ -39,21 +39,18 @@ public interface MangaRepository extends JpaRepository<Manga, Long> {
         List<Manga> findTop5MangasByFavorite();
 
         // get number of favorites for a specified manga
-        @Query(value = "SELECT count(DISTINCT users_data.id) FROM manga_data \n" +
-                        "JOIN favorite_data ON manga_data.id = favorite_data.manga_id " +
-                        "AND manga_data.id = :mangaId\n" +
-                        "JOIN users_data ON users_data.id = favorite_data.user_id \n" +
-                        "GROUP BY manga_data.id", nativeQuery = true)
+        @Query("select count(u) from Manga m join m.userFavorites u where m.id = :mangaId")
         int getNumberOfFavoriteByMangaId(long mangaId);
 
         // sort mangas distinct by which has the newest chapter uploaded latest
         @Query(value = "SELECT * FROM manga_data m\n" +
-                "INNER JOIN \n" +
-                "(SELECT *, ROW_NUMBER() OVER (PARTITION BY mangaid ORDER BY uploaddate DESC, uploadtime DESC) RN " +
-                "FROM chapter_data) c\n" +
-                "ON m.id = c.mangaid AND RN = 1\n" +
-                "ORDER BY uploaddate DESC, uploadtime DESC " +
-                "LIMIT :page, :pageSize", nativeQuery = true)
+                        "INNER JOIN \n" +
+                        "(SELECT *, ROW_NUMBER() OVER (PARTITION BY mangaid ORDER BY uploaddate DESC, uploadtime DESC) RN "
+                        +
+                        "FROM chapter_data) c\n" +
+                        "ON m.id = c.mangaid AND RN = 1\n" +
+                        "ORDER BY uploaddate DESC, uploadtime DESC " +
+                        "LIMIT :page, :pageSize", nativeQuery = true)
         List<Manga> getAllMangaListByUpdate(int page, int pageSize);
 
         // find manga by id
@@ -66,4 +63,13 @@ public interface MangaRepository extends JpaRepository<Manga, Long> {
         @Query("select m.chapters from Manga m where m.id = :mangaid")
         List<Chapter> getAllChaptersByMangaId(long mangaid);
 
+        @Query("select u.favoriteManga from User u where u.username = :username")
+        List<Manga> getFavoriteMangaByUserId(String username);
+
+        // check if a user has favorited a manga,
+        // query return 0 meaning manga is not favorited, return 1 meaning manga is
+        // favorited
+        @Query("select count(m) from Manga m join m.userFavorites u " +
+                        "where m.id = :mangaid and u.id = :userid")
+        int isMangaFavoritedByUser(long mangaid, long userid);
 }

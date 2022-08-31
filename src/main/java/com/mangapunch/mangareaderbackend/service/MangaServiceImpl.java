@@ -18,7 +18,6 @@ import java.util.Optional;
 public class MangaServiceImpl implements MangaService {
     private static final int MANGA_PAGE_SIZE = 16;
 
-    
     @Autowired
     private EntityManager entityManager;
 
@@ -87,7 +86,21 @@ public class MangaServiceImpl implements MangaService {
     }
 
     @Override
-    public List<Manga> getAllMangaListByUpdate(int page){
+    public List<Manga> getAllMangaListByUpdate(int page) {
         return mangaRepository.getAllMangaListByUpdate(page, MANGA_PAGE_SIZE);
     }
+
+    @Override
+    public List<Manga> getFavoriteMangaByUsername(String username) {
+        return mangaRepository.getFavoriteMangaByUserId(username);
+    }
+
+    // check if a user has favorited a manga,
+    // query return 0 meaning manga is not favorited, return 1 meaning manga is
+    // favorited
+    @Override
+    public boolean isMangaFavoritedByUser(long mangaid, long userid) {
+        return mangaRepository.isMangaFavoritedByUser(mangaid, userid) == 1;
+    };
+
 }

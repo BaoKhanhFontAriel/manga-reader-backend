@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class SignupRequest {
 
     @NotBlank(message = "{name.notblank}")
-    private String name;
+    private String fullname;
     @NotBlank(message = "{name.notblank}")
     private String email;
     @NotBlank(message = "{name.notblank}")

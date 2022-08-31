@@ -1,5 +1,6 @@
 package com.mangapunch.mangareaderbackend.security;
 
+import com.mangapunch.mangareaderbackend.dto.JwtAuthenticationResponse;
 import com.mangapunch.mangareaderbackend.models.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

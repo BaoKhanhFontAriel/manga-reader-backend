@@ -1,5 +1,6 @@
 package com.mangapunch.mangareaderbackend.service;
 
+import com.mangapunch.mangareaderbackend.models.Manga;
 import com.mangapunch.mangareaderbackend.models.User;
 import com.mangapunch.mangareaderbackend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private MangaService mangaService;
 
     @Override
     public List<User> getAllUsers() {
@@ -30,13 +34,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUser(Long userId) {
-        userRepository.deleteById(userId);
+    public void deleteUser(User user) {
+        if (user != null) {
+            userRepository.delete(user);
+        }
     }
 
     @Override
     public User findByUsernameOrEmail(String username, String email) {
-        // TODO Auto-generated method stub
         return userRepository.findByUsernameOrEmail(username, username);
     }
 
@@ -54,4 +59,36 @@ public class UserServiceImpl implements UserService {
     public User findById(long id) {
         return userRepository.findById(id);
     }
+
+    @Override
+    public User updateUser(long id, User user) {
+        User existedUser = userRepository.findById(id);
+        if (existedUser != null) {
+            existedUser.setName(user.getName());
+            existedUser.setEmail(user.getEmail());
+            existedUser.setUsername(user.getUsername());
+            existedUser.setPassword(user.getPassword());
+        }
+        return existedUser;
+    }
+
+    @Override
+    public List<Manga> addMangaToFavorite(long mangaid, long userid) {
+        User user = userRepository.findById(userid);
+        Manga manga = mangaService.findById(mangaid);
+        user.getFavoriteManga().add(manga);
+        manga.getUserFavorites().add(user);
+        userRepository.saveAndFlush(user);
+        return user.getFavoriteManga();
+    }
+
+    @Override
+    public List<Manga> removeMangaToFavorite(long mangaid, long userid) {
+        User user = userRepository.findById(userid);
+        Manga manga = mangaService.findById(mangaid);
+        user.getFavoriteManga().remove(manga);
+        manga.getUserFavorites().remove(user);
+        userRepository.saveAndFlush(user);
+        return user.getFavoriteManga();
+    };
 }

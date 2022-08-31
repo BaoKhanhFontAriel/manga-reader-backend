@@ -29,4 +29,9 @@ public interface MangaService {
     String getUpdateDateTimeByMangaId(long mangaid);
 
     List<Manga> getAllMangaListByUpdate(int page);
+
+    List<Manga> getFavoriteMangaByUsername(String username);
+
+    boolean isMangaFavoritedByUser(long mangaid, long userid);
+
 }

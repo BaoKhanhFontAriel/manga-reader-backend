@@ -25,14 +25,13 @@ public class ChapterController {
     private ModelMapper modelMapper;
 
     // get all Chapters
-    @Secured({"ROLE_USER", "ROLE_ADMIN"})
     @GetMapping("")
     public List<Chapter> listAllChapter() {
         return chapterService.getAllChapters();
     }
 
     // get Chapter detail
-    @Secured({"ROLE_USER", "ROLE_ADMIN"})    @GetMapping("/{chapterid}")
+     @GetMapping("/{chapterid}")
     public Chapter getChapterById(@PathVariable("chapterid") long id) {
         return chapterService.findChapterById(id);
     }
@@ -47,7 +46,6 @@ public class ChapterController {
 
     // Xử lý request "/Chapters" có method POST
     @Secured({"ROLE_USER", "ROLE_ADMIN"})
-
     @PostMapping(value = "/add", consumes = { "multipart/form-data" })
     public String addChapter(@Valid @ModelAttribute("ChapterForm") ChapterRequest ChapterRequest, BindingResult bindingResult,
             Model model) {
@@ -59,7 +57,6 @@ public class ChapterController {
 
     // Xử lý request "/Chapters/{id}" có method PUT
     @Secured({"ROLE_USER", "ROLE_ADMIN"})
-
     @RequestMapping("/edit/{id}")
     public String editChapter(@RequestParam("id") Long ChapterId, Model model) {
         Optional<Chapter> ChapterEdit = chapterService.getChapterByid(ChapterId);
@@ -70,13 +67,11 @@ public class ChapterController {
 
     // Xử lý request "/Chapters/{id}" có method DELETE
     @Secured({"ROLE_USER", "ROLE_ADMIN"})
-
     @DeleteMapping("/delete/{id}")
     public String deleteChapter(@PathVariable("id") Long ChapterId) {
         chapterService.deleteChapter(ChapterId);
         return "redirect:/chapters";
     }
-    @Secured({"ROLE_USER", "ROLE_ADMIN"})
 
     @GetMapping("/{chapterid}/pages")
     public String[] getPagesByChapterId(@PathVariable("chapterid") long id) {
@@ -85,7 +80,6 @@ public class ChapterController {
         return pages;
     }
 
-    @Secured({"ROLE_USER", "ROLE_ADMIN"})
 
     @GetMapping("/{id}/uploaded-datetime")
     public String getUploadedDateTimeByChapterId(@PathVariable("id") long id){

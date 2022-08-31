@@ -1,6 +1,10 @@
 package com.mangapunch.mangareaderbackend.repositories;
 
+import com.mangapunch.mangareaderbackend.models.Manga;
 import com.mangapunch.mangareaderbackend.models.User;
+
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

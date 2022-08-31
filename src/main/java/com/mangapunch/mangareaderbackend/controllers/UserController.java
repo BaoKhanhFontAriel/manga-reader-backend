@@ -1,15 +1,30 @@
 package com.mangapunch.mangareaderbackend.controllers;
 
 import com.mangapunch.mangareaderbackend.dto.SignupRequest;
+import com.mangapunch.mangareaderbackend.models.Manga;
 import com.mangapunch.mangareaderbackend.models.User;
+import com.mangapunch.mangareaderbackend.security.UserPrincipal;
+import com.mangapunch.mangareaderbackend.service.MangaService;
 import com.mangapunch.mangareaderbackend.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
+
+import java.security.Principal;
+import java.util.List;
 import java.util.Optional;
 
 @RequestMapping("/api/users")
@@ -21,8 +36,14 @@ public class UserController {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private MangaService mangaService;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
     // get all Users
-    @GetMapping("/")
+    @GetMapping("")
     public String listAllUser(Model model) {
         model.addAttribute("users", userService.getAllUsers());
 
@@ -31,43 +52,68 @@ public class UserController {
 
     // get User detail
     @GetMapping("/{id}")
-    public String showUserDetail(Model model, @PathVariable("id") Long UserId) {
-        model.addAttribute("User", userService.getUserByid(UserId));
+    public String showUserDetail(@PathVariable("id") Long UserId) {
+        // model.addAttribute("User", userService.getUserByid(UserId));
         return "User";
     }
 
-    // add new User
-    @GetMapping("/add")
-    public String showAddUserForm(Model model) {
-        model.addAttribute("UserForm", new SignupRequest());
-        return "add-User";
+    // update detail of existed user
+    @PutMapping(value = "/edit/{id}", consumes = { "application/json" })
+    public User editUser(@RequestBody SignupRequest updatedData, @RequestParam("id") Long userId) {
+        User updatedUser = modelMapper.map(updatedData, User.class);
+        if (updatedUser != null) {
+            userService.updateUser(userId, updatedUser);
+        }
+        return userService.findById(userId);
     }
 
-    // Xử lý request "/Users" có method POST
-    @PostMapping(value = "/add", consumes = { "multipart/form-data" })
-    public String addUser(@Valid @ModelAttribute("UserForm") SignupRequest UserRequest, BindingResult bindingResult,
-            Model model) {
-        User User = modelMapper.map(UserRequest, User.class);
-        userService.addUser(User);
-        return "redirect:/Users";
-
-    }
-
-    // Xử lý request "/Users/{id}" có method PUT
-    @RequestMapping("/edit/{id}")
-    public String editUser(@RequestParam("id") Long UserId, Model model) {
-        Optional<User> UserEdit = userService.getUserByid(UserId);
-        UserEdit.ifPresent(User -> model.addAttribute("User", UserEdit));
-        return "edit-User";
-
-    }
-
-    // Xử lý request "/Users/{id}" có method DELETE
+    // delete existed user
     @DeleteMapping("/delete/{id}")
-    public String deleteUser(@PathVariable("id") Long UserId) {
-        userService.deleteUser(UserId);
-
-        return "redirect:/Users";
-
+    public void deleteUser(@PathVariable("id") Long UserId) {
+        Optional<User> existedUser = userService.getUserByid(UserId);
+        existedUser.ifPresent((editUser) -> {
+            userService.deleteUser(editUser);
+        });
     }
+
+    @GetMapping("/add-favorite")
+    public List<Manga> addMangaToFavorite(@RequestParam long userid, @RequestParam long mangaid) {
+        return userService.addMangaToFavorite(mangaid, userid);
+    }
+
+    @GetMapping("/remove-favorite")
+    public List<Manga> removeMangaToFavorite(@RequestParam long userid, @RequestParam long mangaid) {
+        return userService.removeMangaToFavorite(mangaid, userid);
+    }
+
+    // @GetMapping("/{username}/favorites")
+    // public ResponseEntity<?> getFavoriteMangaByUserId(@PathVariable("username")
+    // String username) {
+    // try {
+    // Authentication authentication = authenticationManager.authenticate(
+    // new UsernamePasswordAuthenticationToken(
+    // username));
+
+    // SecurityContextHolder.getContext().setAuthentication(authentication);
+    // UserPrincipal user = (UserPrincipal) authentication.getPrincipal();
+    // if (userPrincipal.getUsername() == username) {
+    // return
+    // ResponseEntity.status(HttpStatus.OK).body(mangaService.getFavoriteMangaByUsername(username));
+    // }
+
+    // else {
+    // throw new SecurityException();
+    // }
+
+    // } catch (Exception e) {
+    // return ResponseEntity.status(HttpStatus.FORBIDDEN)
+    // .body("You are not authorized to access data: " + e.getMessage());
+    // }
+    // };
+
+    // @PreAuthorize("#username == principal.username")
+    @GetMapping("/{username}/favorites")
+    public ResponseEntity<?> getFavoriteMangaByUserId(@PathVariable("username") String username) {
+        return ResponseEntity.status(HttpStatus.OK).body(mangaService.getFavoriteMangaByUsername(username));
+    };
 }

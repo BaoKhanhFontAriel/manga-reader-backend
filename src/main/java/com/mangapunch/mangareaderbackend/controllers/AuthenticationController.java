@@ -9,6 +9,7 @@ import com.mangapunch.mangareaderbackend.models.Role;
 import com.mangapunch.mangareaderbackend.models.RoleEnum;
 import com.mangapunch.mangareaderbackend.models.User;
 import com.mangapunch.mangareaderbackend.repositories.RoleRepository;
+import com.mangapunch.mangareaderbackend.security.UserPrincipal;
 import com.mangapunch.mangareaderbackend.service.UserService;
 import com.mangapunch.mangareaderbackend.utils.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,48 +48,51 @@ public class AuthenticationController {
     JwtTokenUtil tokenProvider;
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+    public JwtAuthenticationResponse authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getUsername(),
-                        loginRequest.getPassword()
-                )
-        );
+                        loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
+        UserPrincipal user =(UserPrincipal) authentication.getPrincipal();
+        
         String jwt = tokenProvider.generateToken(authentication);
-        return ResponseEntity.ok(new JwtAuthenticationResponse(jwt));
+
+        return new JwtAuthenticationResponse(jwt, user.getUsername(), user.getPassword());
     }
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-        if(userService.findByUsername(signUpRequest.getUsername()) != null) {
+        if (userService.findByUsername(signUpRequest.getUsername()) != null) {
             return new ResponseEntity(new ApiResponse(false, "Username is already taken!"),
                     HttpStatus.BAD_REQUEST);
         }
 
-        if(userService.findByEmail(signUpRequest.getUsername()) != null) {
+        if (userService.findByEmail(signUpRequest.getUsername()) != null) {
             return new ResponseEntity(new ApiResponse(false, "Email Address already in use!"),
                     HttpStatus.BAD_REQUEST);
         }
 
         // Creating user's account
         User user = new User();
-        user.setName(signUpRequest.getName());
+        user.setName(signUpRequest.getFullname());
         user.setEmail(signUpRequest.getEmail());
         user.setUsername(signUpRequest.getUsername());
         user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
 
         Role userRole = roleRepository.findByName(RoleEnum.ROLE_USER);
-        if (userRole == null) throw  new AppException("User Role not set.");
+        if (userRole == null)
+            throw new AppException("User Role not set.");
         user.setRole(userRole);
 
         userService.addUser(user);
 
+        String path = "/api/users/" + user.getId();
+
         URI location = ServletUriComponentsBuilder
-                .fromCurrentContextPath().path("/api/users/{id}")
+                .fromCurrentContextPath().path(path)
                 .buildAndExpand(user.getUsername()).toUri();
 
         return ResponseEntity.created(location).body(new ApiResponse(true, "User registered successfully"));
