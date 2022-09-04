@@ -35,4 +35,6 @@ public interface UserService {
 
     List<Manga> getFavoriteMangaByUsername(String username);
 
+    
+
 }

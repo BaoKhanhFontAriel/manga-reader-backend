@@ -2,9 +2,6 @@ package com.mangapunch.mangareaderbackend.dto;
 
 import javax.validation.constraints.NotBlank;
 
-import com.mangapunch.mangareaderbackend.models.Manga;
-import com.mangapunch.mangareaderbackend.models.User;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,10 +13,12 @@ public class ChapterRequest {
     @NotBlank(message= "{name.notblank}")
     private String title;
 
+    private String optional;
+
+    private long mangaid;
+
     @NotBlank(message= "{name.notblank}")
     private String pageUrls;
 
-    private Manga manga;
-
-    private User uploader;
+    private String username;
 }

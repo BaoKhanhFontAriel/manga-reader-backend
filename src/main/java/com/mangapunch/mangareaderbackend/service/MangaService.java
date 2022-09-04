@@ -1,6 +1,10 @@
 package com.mangapunch.mangareaderbackend.service;
 
+import com.mangapunch.mangareaderbackend.dto.SearchRequest;
+import com.mangapunch.mangareaderbackend.dto.SearchResponse;
 import com.mangapunch.mangareaderbackend.models.Manga;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,6 +34,8 @@ public interface MangaService {
 
     List<Manga> getAllMangaListByUpdate(int page);
 
+    Manga findMangaByChapterId(long chapterId);
 
+    SearchResponse getSearchedMangas(SearchRequest gerGenreRequest);
 
 }

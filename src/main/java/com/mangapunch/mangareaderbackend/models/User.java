@@ -7,12 +7,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+
+import org.hibernate.search.annotations.Indexed;
+
 import java.util.List;
 
 @Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Indexed
 @Builder
 @Table(name = "users_data")
 public class User {
@@ -29,7 +33,7 @@ public class User {
     private String password;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "uploader")
+    @OneToMany(mappedBy = "uploader", cascade = { CascadeType.ALL }, orphanRemoval = true)
     private List<Chapter> uploadChapters;
 
     @JsonIgnore

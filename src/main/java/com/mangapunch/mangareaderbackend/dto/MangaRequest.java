@@ -21,7 +21,7 @@ public class MangaRequest {
     private String thumbnailUrl;
     @NotBlank(message= "{name.notblank}")
     private String author;
-    private List<Genre> genres;
+    // private List<Genre> genres;
     @NotBlank(message= "{name.notblank}")
     private String summary;
 }

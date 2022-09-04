@@ -17,7 +17,7 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
 
     @Autowired
-    private MangaService mangaService;
+    private MangaRepository mangaService;
 
     @Autowired
     private MangaRepository mangaRepository;

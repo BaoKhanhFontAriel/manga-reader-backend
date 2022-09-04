@@ -1,19 +1,26 @@
 package com.mangapunch.mangareaderbackend.controllers;
 
+import com.mangapunch.mangareaderbackend.dto.ChapterRequest;
 import com.mangapunch.mangareaderbackend.dto.MangaRequest;
+import com.mangapunch.mangareaderbackend.dto.SearchRequest;
+import com.mangapunch.mangareaderbackend.dto.SearchResponse;
 import com.mangapunch.mangareaderbackend.models.Chapter;
 import com.mangapunch.mangareaderbackend.models.Manga;
 import com.mangapunch.mangareaderbackend.service.ChapterService;
 import com.mangapunch.mangareaderbackend.service.MangaService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
+
+import java.lang.module.ResolutionException;
 import java.util.List;
 import java.util.Optional;
 
@@ -125,6 +132,24 @@ public class MangaController {
         return chapterService.findByMangaId(mangaId);
     };
 
+    @Secured({ "ROLE_USER", "ROLE_ADMIN" })
+    @PostMapping("/{mangaid}/upload-chapter")
+    public ResponseEntity<?> addNewChapter(@PathVariable long mangaid, @RequestBody ChapterRequest chapterRequest) {
+        Chapter chapter = chapterService.addNewChapter(mangaid, chapterRequest);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(chapter);
+    }
 
+    @PostMapping("/search")
+    public ResponseEntity<?> getSearchedMangas(@RequestBody SearchRequest searchRequest) {
+        SearchResponse result = mangaService.getSearchedMangas(searchRequest);
+        try {
+            if (result.getMangas().isEmpty()) {
+                throw new Exception("Không tìm thấy kết quả");
+            }
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
 
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
 }

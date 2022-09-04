@@ -2,16 +2,29 @@ package com.mangapunch.mangareaderbackend.controllers;
 
 import com.mangapunch.mangareaderbackend.dto.ChapterRequest;
 import com.mangapunch.mangareaderbackend.models.Chapter;
+import com.mangapunch.mangareaderbackend.models.Manga;
+import com.mangapunch.mangareaderbackend.models.User;
 import com.mangapunch.mangareaderbackend.service.ChapterService;
+import com.mangapunch.mangareaderbackend.service.MangaService;
+import com.mangapunch.mangareaderbackend.service.UserService;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.HtmlUtils;
 
 import javax.validation.Valid;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +35,8 @@ public class ChapterController {
     @Autowired
     private ChapterService chapterService;
     @Autowired
+    private MangaService mangaService;
+    @Autowired
     private ModelMapper modelMapper;
 
     // get all Chapters
@@ -31,66 +46,45 @@ public class ChapterController {
     }
 
     // get Chapter detail
-     @GetMapping("/{chapterid}")
+    @GetMapping("/{chapterid}")
     public Chapter getChapterById(@PathVariable("chapterid") long id) {
         return chapterService.findChapterById(id);
     }
 
-    // add new Chapter
-    @Secured({"ROLE_USER", "ROLE_ADMIN"})
-    @GetMapping("/add")
-    public String showAddChapterForm(Model model) {
-        model.addAttribute("ChapterForm", new ChapterRequest());
-        return "add-chapter";
-    }
-
-    // Xử lý request "/Chapters" có method POST
-    @Secured({"ROLE_USER", "ROLE_ADMIN"})
-    @PostMapping(value = "/add", consumes = { "multipart/form-data" })
-    public String addChapter(@Valid @ModelAttribute("ChapterForm") ChapterRequest ChapterRequest, BindingResult bindingResult,
-            Model model) {
-        Chapter Chapter = modelMapper.map(ChapterRequest, Chapter.class);
-        chapterService.addChapter(Chapter);
-        return "redirect:/chapters";
+    // Xử lý request cập nhật thông tin chương truyện
+    @PreAuthorize("#username == principal.username")
+    @PutMapping("/{chapterId}/edit")
+    public ResponseEntity<?> editChapter(@PathVariable("chapterId") long chapterId,
+            @RequestBody ChapterRequest chapterRequest,
+            @Param("username") String username) {
+        Chapter chapter = chapterService.updateChapterDetail(chapterId, chapterRequest);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(chapter);
 
     }
 
-    // Xử lý request "/Chapters/{id}" có method PUT
-    @Secured({"ROLE_USER", "ROLE_ADMIN"})
-    @RequestMapping("/edit/{id}")
-    public String editChapter(@RequestParam("id") Long ChapterId, Model model) {
-        Optional<Chapter> ChapterEdit = chapterService.getChapterByid(ChapterId);
-        ChapterEdit.ifPresent(Chapter -> model.addAttribute("Chapter", ChapterEdit));
-        return "edit-chapter";
-
-    }
-
-    // Xử lý request "/Chapters/{id}" có method DELETE
-    @Secured({"ROLE_USER", "ROLE_ADMIN"})
-    @DeleteMapping("/delete/{id}")
-    public String deleteChapter(@PathVariable("id") Long ChapterId) {
-        chapterService.deleteChapter(ChapterId);
-        return "redirect:/chapters";
+    // Xử lý request user muốn chương truyện mình đã đăng tải
+    @PreAuthorize("#username == principal.username")
+    @DeleteMapping("/{chapterId}/delete")
+    public ResponseEntity<?> deleteChapter(@PathVariable("chapterId") long chapterId, @RequestParam String username) {
+        chapterService.deleteChapter(chapterId);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body("Xóa thành công");
     }
 
     @GetMapping("/{chapterid}/pages")
     public String[] getPagesByChapterId(@PathVariable("chapterid") long id) {
-        Chapter chapter = chapterService.findChapterById(id);
-        String[] pages = chapter.getPageUrls().split(" ");
-        return pages;
+        return chapterService.getPagesByChapterId(id);
     }
 
-
     @GetMapping("/{id}/uploaded-datetime")
-    public String getUploadedDateTimeByChapterId(@PathVariable("id") long id){
+    public String getUploadedDateTimeByChapterId(@PathVariable("id") long id) {
         Chapter chapter = chapterService.findChapterById(id);
         LocalDateTime datetime = LocalDateTime.of(chapter.getUploadedDate(), chapter.getUploadedTime());
         String datetimeStr = datetime.format(DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy")).toString();
         return datetimeStr;
     };
 
-    // @GetMapping("/{mangaId}/chapter")
-    // List<Chapter> findByMangaId(@PathVariable("mangaid") long mangaId){
-    //     return chapterService.findByMangaId(mangaId);
-    // };
+    @GetMapping("/{chapterid}/manga")
+    public Manga findMangaByChapterId(@PathVariable("chapterid") long chapterId) {
+        return mangaService.findMangaByChapterId(chapterId);
+    }
 }

@@ -7,6 +7,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+
+import org.hibernate.search.annotations.Indexed;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.function.BooleanSupplier;
@@ -16,6 +19,7 @@ import java.util.function.BooleanSupplier;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Indexed
 @Table(name = "chapter_data")
 public class Chapter {
     @Id
@@ -25,18 +29,20 @@ public class Chapter {
     @Column(name = "title")
     private String title;
 
+    @Column(name = "optional")
+    private String optional;
+
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "mangaid", nullable = false,insertable = false, updatable = false)
+    @JoinColumn(name = "mangaid")
     private Manga manga;
 
-    @Column(name ="pageurls")
+    @Column(name = "pageurls")
     private String pageUrls;
 
     @Column(name = "views")
     private int views;
 
-    
     @Column(name = "uploaddate", columnDefinition = "DATE")
     private LocalDate uploadedDate;
 
@@ -45,7 +51,7 @@ public class Chapter {
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name="uploaderid")
+    @JoinColumn(name = "uploaderid")
     private User uploader;
 
     public BooleanSupplier isNotNull() {

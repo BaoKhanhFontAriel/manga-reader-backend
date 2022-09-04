@@ -63,5 +63,7 @@ public interface MangaRepository extends JpaRepository<Manga, Long> {
         @Query("select m.chapters from Manga m where m.id = :mangaid")
         List<Chapter> getAllChaptersByMangaId(long mangaid);
 
+        @Query("select m from Manga m join m.chapters c where c.id = :chapterId")
+        Manga findMangaByChapterId(long chapterId);
 
 }

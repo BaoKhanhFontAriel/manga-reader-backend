@@ -18,12 +18,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
@@ -48,53 +50,62 @@ public class AuthenticationController {
     JwtTokenUtil tokenProvider;
 
     @PostMapping("/login")
-    public JwtAuthenticationResponse authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginRequest.getUsername(),
-                        loginRequest.getPassword()));
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getUsername(),
+                            loginRequest.getPassword()));
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        UserPrincipal user =(UserPrincipal) authentication.getPrincipal();
-        
-        String jwt = tokenProvider.generateToken(authentication);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            UserPrincipal user = (UserPrincipal) authentication.getPrincipal();
 
-        return new JwtAuthenticationResponse(jwt, user.getUsername(), user.getPassword());
+            String jwt = tokenProvider.generateToken(authentication);
+            return ResponseEntity.status(HttpStatus.ACCEPTED)
+                    .body(new JwtAuthenticationResponse(jwt, user.getUsername(), user.getPassword()));
+
+        } catch (AuthenticationException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên đăng nhập hoặc mật khẩu sai!", e);
+        }
     }
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-        if (userService.findByUsername(signUpRequest.getUsername()) != null) {
-            return new ResponseEntity(new ApiResponse(false, "Username is already taken!"),
-                    HttpStatus.BAD_REQUEST);
+
+        try {
+
+            // check whether email or password existed
+            if (userService.findByEmail(signUpRequest.getEmail()) != null) {
+                throw new Exception("Email đã tồn tại!");
+            }
+            if (userService.findByUsername(signUpRequest.getUsername()) != null) {
+                throw new Exception("Tên đăng nhập đã tồn tại!");
+            }
+
+            // Creating user's account
+            User user = new User();
+            user.setName(signUpRequest.getFullname());
+            user.setEmail(signUpRequest.getEmail());
+            user.setUsername(signUpRequest.getUsername());
+            user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
+
+            Role userRole = roleRepository.findByName(RoleEnum.ROLE_USER);
+            if (userRole == null)
+                throw new AppException("User Role not set.");
+            user.setRole(userRole);
+
+            userService.addUser(user);
+
+            // String path = "/api/users/" + user.getId();
+
+            // URI location = ServletUriComponentsBuilder
+            //         .fromCurrentContextPath().path(path)
+            //         .buildAndExpand(user.getUsername()).toUri();
+
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(user);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
-
-        if (userService.findByEmail(signUpRequest.getUsername()) != null) {
-            return new ResponseEntity(new ApiResponse(false, "Email Address already in use!"),
-                    HttpStatus.BAD_REQUEST);
-        }
-
-        // Creating user's account
-        User user = new User();
-        user.setName(signUpRequest.getFullname());
-        user.setEmail(signUpRequest.getEmail());
-        user.setUsername(signUpRequest.getUsername());
-        user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
-
-        Role userRole = roleRepository.findByName(RoleEnum.ROLE_USER);
-        if (userRole == null)
-            throw new AppException("User Role not set.");
-        user.setRole(userRole);
-
-        userService.addUser(user);
-
-        String path = "/api/users/" + user.getId();
-
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentContextPath().path(path)
-                .buildAndExpand(user.getUsername()).toUri();
-
-        return ResponseEntity.created(location).body(new ApiResponse(true, "User registered successfully"));
     }
 }
