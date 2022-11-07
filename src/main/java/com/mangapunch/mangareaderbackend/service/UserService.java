@@ -1,5 +1,6 @@
 package com.mangapunch.mangareaderbackend.service;
 
+import com.mangapunch.mangareaderbackend.dto.UserEditRequest;
 import com.mangapunch.mangareaderbackend.models.Manga;
 import com.mangapunch.mangareaderbackend.models.User;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,8 @@ public interface UserService {
 
     Optional<User> getUserByid(Long UserId);
 
+    User editUser(User currentUser, UserEditRequest request) throws Exception;
+
     void deleteUser(User user);
 
     User findByUsernameOrEmail(String username, String email);
@@ -25,16 +28,15 @@ public interface UserService {
 
     User findById(long id);
 
-    User updateUser(long id, User user);
+    List<Manga> addMangaToFavorite(long mangaid, User currentUser);
 
-    List<Manga> addMangaToFavorite(long mangaid, String username);
+    List<Manga> removeMangaToFavorite(long mangaid, User currentUser);
 
-    List<Manga> removeMangaToFavorite(long mangaid, String username);
+    boolean isMangaFavoritedByUser(long mangaid, User currentUser);
 
-    boolean isMangaFavoritedByUser(long mangaid, String username);
+    List<Manga> getFavoriteMangaByUserId(User currentUser);
 
-    List<Manga> getFavoriteMangaByUsername(String username);
+    boolean isPasswordMatch(User currentUser, String rawPassword);
 
-    
-
+    void editPassword(User currentUser, String newPassword);
 }

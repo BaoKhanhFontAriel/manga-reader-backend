@@ -2,10 +2,12 @@ package com.mangapunch.mangareaderbackend.controllers;
 
 import com.mangapunch.mangareaderbackend.dto.ChapterRequest;
 import com.mangapunch.mangareaderbackend.dto.MangaRequest;
-import com.mangapunch.mangareaderbackend.dto.SearchRequest;
+import com.mangapunch.mangareaderbackend.dto.MangaResponse;
 import com.mangapunch.mangareaderbackend.dto.SearchResponse;
 import com.mangapunch.mangareaderbackend.models.Chapter;
 import com.mangapunch.mangareaderbackend.models.Manga;
+import com.mangapunch.mangareaderbackend.models.User;
+import com.mangapunch.mangareaderbackend.security.UserPrincipal;
 import com.mangapunch.mangareaderbackend.service.ChapterService;
 import com.mangapunch.mangareaderbackend.service.MangaService;
 import org.modelmapper.ModelMapper;
@@ -13,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.Authentication;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +23,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 
-import java.lang.module.ResolutionException;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,15 +40,8 @@ public class MangaController {
 
     // get all mangas
     @GetMapping("")
-    public List<Manga> getAllMangas(@RequestParam int page) {
+    public MangaResponse getAllMangas(@RequestParam int page) {
         return mangaService.getAllMangaListByUpdate(page);
-    }
-
-    // get manga detail
-    @GetMapping("/{id}")
-    public String showMangaDetail(Model model, @PathVariable("id") Long mangaId) {
-        model.addAttribute("manga", mangaService.getMangaById(mangaId));
-        return "manga";
     }
 
     // add new manga
@@ -112,8 +107,8 @@ public class MangaController {
         return mangaService.getNumberOfFavoriteByMangaId(mangaId);
     };
 
-    @GetMapping("/manga")
-    public Manga findMangaById(@RequestParam("id") long mangaid) {
+    @GetMapping("/{mangaid}")
+    public Manga findMangaById(@PathVariable("mangaid") long mangaid) {
         return mangaService.findById(mangaid);
     };
 
@@ -134,22 +129,27 @@ public class MangaController {
 
     @Secured({ "ROLE_USER", "ROLE_ADMIN" })
     @PostMapping("/{mangaid}/upload-chapter")
-    public ResponseEntity<?> addNewChapter(@PathVariable long mangaid, @RequestBody ChapterRequest chapterRequest) {
-        Chapter chapter = chapterService.addNewChapter(mangaid, chapterRequest);
+    public ResponseEntity<?> addNewChapter(@PathVariable long mangaid,
+            @RequestBody ChapterRequest chapterRequest,
+            Authentication auth) {
+        User user = ((UserPrincipal) auth.getPrincipal()).getUser();
+        Chapter chapter = chapterService.addNewChapter(mangaid, chapterRequest, user);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(chapter);
     }
 
-    @PostMapping("/search")
-    public ResponseEntity<?> getSearchedMangas(@RequestBody SearchRequest searchRequest) {
-        SearchResponse result = mangaService.getSearchedMangas(searchRequest);
+   
+
+    @GetMapping("/find-manga")
+    public ResponseEntity<?> findMangaListByGenreSortBy(@RequestParam String genre, @RequestParam String sortBy,
+            @RequestParam int page) {
         try {
-            if (result.getMangas().isEmpty()) {
-                throw new Exception("Không tìm thấy kết quả");
+            MangaResponse mangas = mangaService.findMangaListByGenreSortBy(genre, sortBy, page);
+            if (mangas == null){
+                throw new Exception("Không có truyện nào trong thể loại này!");
             }
+            return ResponseEntity.status(HttpStatus.OK).body(mangas);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
-
-        return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 }

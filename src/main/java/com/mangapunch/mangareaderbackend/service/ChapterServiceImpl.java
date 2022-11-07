@@ -10,7 +10,9 @@ import com.mangapunch.mangareaderbackend.repositories.UserRepository;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -46,11 +48,10 @@ public class ChapterServiceImpl implements ChapterService {
     public void deleteChapter(long chapterId) {
         Optional<Chapter> chapter = chapterRepository.findById(chapterId);
         try {
-            if (chapter.isPresent()) {                
+            if (chapter.isPresent()) {
                 chapterRepository.deleteById(chapterId);
                 // chapterRepository.flush();
-            }
-            else {
+            } else {
                 throw new Exception("Truyện không tồn tại!");
             }
         } catch (Exception e) {
@@ -92,8 +93,8 @@ public class ChapterServiceImpl implements ChapterService {
     }
 
     @Override
-    public Chapter addNewChapter(long mangaid, ChapterRequest chapterRequest) {
-        User uploader = userRepository.findByUsername(chapterRequest.getUsername());
+    public Chapter addNewChapter(long mangaid, ChapterRequest chapterRequest, User user) {
+
         Manga manga = mangaRepository.findById(mangaid);
 
         Chapter chapter = Chapter.builder()
@@ -106,7 +107,7 @@ public class ChapterServiceImpl implements ChapterService {
                 .build();
 
         chapter.setManga(manga);
-        chapter.setUploader(uploader);
+        chapter.setUploader(user);
 
         chapterRepository.save(chapter);
         chapterRepository.flush();
@@ -115,33 +116,35 @@ public class ChapterServiceImpl implements ChapterService {
     }
 
     @Override
-    public List<Chapter> getAllChapterByUsername(String username) {
-
-        return chapterRepository.findByUsernameOderByDateTime(username);
+    public List<Chapter> getAllUploadedChapters(User user) {
+        return chapterRepository.findByUserIdOderByDateTime(user.getId());
     }
 
     @Override
-    public Chapter updateChapterDetail(long chapterid, ChapterRequest chapterRequest) {
+    public Chapter editChapterDetail(long chapterid, ChapterRequest chapterRequest) {
         Optional<Chapter> chapter = chapterRepository.findById(chapterid);
         try {
-            if (chapter.isPresent()) {
-                try {
-                    Chapter edited = chapter.get();
-                    edited.setTitle(chapterRequest.getTitle());
-                    edited.setOptional(chapterRequest.getOptional());
-                    edited.setPageUrls(chapterRequest.getPageUrls());
-                    chapterRepository.saveAndFlush(edited);
-                    return edited;
-                } catch (Exception e) {
-                    throw new Exception("Cập nhật thất bại do chuyển đổi dũ liệu không thành công");
-                }
-            } else {
+            if (!chapter.isPresent()) {
                 throw new Exception("Chapter không tồn tại");
             }
+
+            if (chapterRequest.getUploaderid() != chapter.get().getUploader().getId()) {
+                throw new Exception("Bạn không có quyền thay đổi nội dung chapter!");
+            }
+
+            try {
+                Chapter edited = chapter.get();
+                edited.setTitle(chapterRequest.getTitle());
+                edited.setOptional(chapterRequest.getOptional());
+                edited.setPageUrls(chapterRequest.getPageUrls());
+                chapterRepository.saveAndFlush(edited);
+                return edited;
+            } catch (Exception e) {
+                throw new Exception("Cập nhật thất bại do chuyển đổi dũ liệu không thành công");
+            }
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
-        return null;
     }
 
 }

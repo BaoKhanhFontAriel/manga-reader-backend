@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -60,10 +59,18 @@ public class AuthenticationController {
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
             UserPrincipal user = (UserPrincipal) authentication.getPrincipal();
-
             String jwt = tokenProvider.generateToken(authentication);
+
+            JwtAuthenticationResponse response = JwtAuthenticationResponse.builder()
+                    .id(user.getUser().getId())
+                    .accessToken(jwt)
+                    .tokenType("Bearer")
+                    .username(user.getUser().getUsername())
+                    .password(user.getUser().getPassword())
+                    .build();
+
             return ResponseEntity.status(HttpStatus.ACCEPTED)
-                    .body(new JwtAuthenticationResponse(jwt, user.getUsername(), user.getPassword()));
+                    .body(response);
 
         } catch (AuthenticationException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tên đăng nhập hoặc mật khẩu sai!", e);
@@ -71,7 +78,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+    public ResponseEntity<?> registerUser(@RequestBody SignupRequest signUpRequest) {
 
         try {
 
@@ -92,7 +99,7 @@ public class AuthenticationController {
 
             Role userRole = roleRepository.findByName(RoleEnum.ROLE_USER);
             if (userRole == null)
-                throw new AppException("User Role not set.");
+                throw new Exception("User Role not set.");
             user.setRole(userRole);
 
             userService.addUser(user);
@@ -100,12 +107,13 @@ public class AuthenticationController {
             // String path = "/api/users/" + user.getId();
 
             // URI location = ServletUriComponentsBuilder
-            //         .fromCurrentContextPath().path(path)
-            //         .buildAndExpand(user.getUsername()).toUri();
+            // .fromCurrentContextPath().path(path)
+            // .buildAndExpand(user.getUsername()).toUri();
 
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(user);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }
+
 }

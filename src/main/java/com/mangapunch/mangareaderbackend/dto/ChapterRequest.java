@@ -10,15 +10,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChapterRequest {
-    @NotBlank(message= "{name.notblank}")
+    @NotBlank(message = "{name.notblank}")
     private String title;
 
     private String optional;
 
     private long mangaid;
 
-    @NotBlank(message= "{name.notblank}")
+    @NotBlank(message = "{name.notblank}")
     private String pageUrls;
 
-    private String username;
+    private long uploaderid;
 }

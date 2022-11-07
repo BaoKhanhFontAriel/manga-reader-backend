@@ -3,6 +3,7 @@ package com.mangapunch.mangareaderbackend.test;
 import com.mangapunch.mangareaderbackend.models.Chapter;
 import com.mangapunch.mangareaderbackend.models.Manga;
 import com.mangapunch.mangareaderbackend.models.User;
+import com.mangapunch.mangareaderbackend.repositories.MangaRepository;
 import com.mangapunch.mangareaderbackend.service.ChapterService;
 import com.mangapunch.mangareaderbackend.service.MangaService;
 import com.mangapunch.mangareaderbackend.service.UserService;
@@ -34,6 +35,9 @@ public class MangaQueryTest {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    MangaRepository mangaRepository;
 
     // test if query the latest chapter of desired manga works
     @Test
@@ -68,7 +72,7 @@ public class MangaQueryTest {
 
     @Test
     public void sortMangaByUpdate() {
-        List<Manga> mangas = mangaService.getAllMangaListByUpdate(0);
+        List<Manga> mangas = mangaService.getAllMangaListByUpdate(0).getMangas();
         Optional<Manga> result = mangas.stream().findFirst();
 
         assertTrue(result.isPresent());
@@ -86,5 +90,10 @@ public class MangaQueryTest {
         User user = userService.findByUsernameOrEmail("khanhadmin","khanhadmin");
         assertTrue(user != null);
         assertThat(user.getUsername()).isEqualTo("khanhadmin");
+    }
+    @Test
+    public void countMangasWithChapters(){
+        int count = mangaRepository.countMangasWithChapters();
+        assertTrue(count == 90); 
     }
 }

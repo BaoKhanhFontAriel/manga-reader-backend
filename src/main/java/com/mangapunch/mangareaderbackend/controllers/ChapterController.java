@@ -4,6 +4,7 @@ import com.mangapunch.mangareaderbackend.dto.ChapterRequest;
 import com.mangapunch.mangareaderbackend.models.Chapter;
 import com.mangapunch.mangareaderbackend.models.Manga;
 import com.mangapunch.mangareaderbackend.models.User;
+import com.mangapunch.mangareaderbackend.security.UserPrincipal;
 import com.mangapunch.mangareaderbackend.service.ChapterService;
 import com.mangapunch.mangareaderbackend.service.MangaService;
 import com.mangapunch.mangareaderbackend.service.UserService;
@@ -15,11 +16,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.HtmlUtils;
 
+import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
 
 import java.time.LocalDate;
@@ -52,20 +56,18 @@ public class ChapterController {
     }
 
     // Xử lý request cập nhật thông tin chương truyện
-    @PreAuthorize("#username == principal.username")
+    @RolesAllowed("ROLE_USER")
     @PutMapping("/{chapterId}/edit")
     public ResponseEntity<?> editChapter(@PathVariable("chapterId") long chapterId,
-            @RequestBody ChapterRequest chapterRequest,
-            @Param("username") String username) {
-        Chapter chapter = chapterService.updateChapterDetail(chapterId, chapterRequest);
+            @RequestBody ChapterRequest chapterRequest) {
+        Chapter chapter = chapterService.editChapterDetail(chapterId, chapterRequest);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(chapter);
-
     }
 
     // Xử lý request user muốn chương truyện mình đã đăng tải
-    @PreAuthorize("#username == principal.username")
+    @RolesAllowed("ROLE_USER")
     @DeleteMapping("/{chapterId}/delete")
-    public ResponseEntity<?> deleteChapter(@PathVariable("chapterId") long chapterId, @RequestParam String username) {
+    public ResponseEntity<?> deleteChapter(@PathVariable("chapterId") long chapterId) {
         chapterService.deleteChapter(chapterId);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body("Xóa thành công");
     }

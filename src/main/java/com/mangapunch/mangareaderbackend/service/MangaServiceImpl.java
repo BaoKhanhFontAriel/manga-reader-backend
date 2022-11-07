@@ -1,23 +1,33 @@
 package com.mangapunch.mangareaderbackend.service;
 
-import com.mangapunch.mangareaderbackend.dto.SearchRequest;
+import com.mangapunch.mangareaderbackend.dto.MangaResponse;
 import com.mangapunch.mangareaderbackend.dto.SearchResponse;
 import com.mangapunch.mangareaderbackend.models.Chapter;
 import com.mangapunch.mangareaderbackend.models.Genre;
+import com.mangapunch.mangareaderbackend.models.GenreEnum;
 import com.mangapunch.mangareaderbackend.models.Manga;
+import com.mangapunch.mangareaderbackend.models.MangaPageSize;
+import com.mangapunch.mangareaderbackend.repositories.GenreRepository;
 import com.mangapunch.mangareaderbackend.repositories.MangaRepository;
+import com.mangapunch.mangareaderbackend.utils.GenreUtil;
 
 import org.apache.lucene.search.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.search.FullTextSession;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.FullTextQuery;
 import org.hibernate.search.jpa.Search;
+import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.EntityManager;
+
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,9 +35,6 @@ import java.util.Optional;
 
 @Component
 public class MangaServiceImpl implements MangaService {
-    private static final int MANGA_PAGE_SIZE_4_X_4 = 16;
-    private static final int MANGA_PAGE_SIZE_6_X_4 = 24;
-
     @Autowired
     private EntityManager entityManager;
 
@@ -54,7 +61,10 @@ public class MangaServiceImpl implements MangaService {
 
     @Override
     public List<Manga> findTop5MangasWithMostViews() {
-        return mangaRepository.sortMangasByTotalViews();
+        javax.persistence.Query query = entityManager
+                .createQuery("select m from Manga m join m.chapters c group by m.id order by sum(c.views) desc");
+        query.setMaxResults(5);
+        return query.getResultList();
     }
 
     @Override
@@ -69,7 +79,10 @@ public class MangaServiceImpl implements MangaService {
 
     @Override
     public List<Manga> findTop5MangasByFavorite() {
-        return mangaRepository.findTop5MangasByFavorite();
+        javax.persistence.Query query = entityManager
+                .createQuery("select m from Manga m join m.userFavorites u group by m.id order by count(u) desc");
+        query.setMaxResults(5);
+        return query.getResultList();
     }
 
     @Override
@@ -96,8 +109,15 @@ public class MangaServiceImpl implements MangaService {
     }
 
     @Override
-    public List<Manga> getAllMangaListByUpdate(int page) {
-        return mangaRepository.getAllMangaListByUpdate(page, MANGA_PAGE_SIZE_4_X_4);
+    public MangaResponse getAllMangaListByUpdate(int page) {
+
+        // convert from page appear on frontend to the real page in repository
+        int repositoryPage = page * MangaPageSize.MANGA_PAGE_SIZE_4_X_4;
+        List<Manga> mangas = mangaRepository.getAllMangaListByUpdate(repositoryPage,
+                MangaPageSize.MANGA_PAGE_SIZE_4_X_4);
+        int totalPages = (int) Math.ceil((double) mangaRepository.countMangasWithChapters() / MangaPageSize.MANGA_PAGE_SIZE_4_X_4);
+        MangaResponse mangaResponse = new MangaResponse(totalPages, mangas);
+        return mangaResponse;
     }
 
     @Override
@@ -106,89 +126,39 @@ public class MangaServiceImpl implements MangaService {
     }
 
     @Override
-    public SearchResponse getSearchedMangas(SearchRequest searchRequest) {
-        FullTextEntityManager fullTextEntityManager = Search.getFullTextEntityManager(entityManager);
+    public MangaResponse findMangaListByGenreSortBy(String genre, String sortBy, int page) {
+
         try {
-            fullTextEntityManager.createIndexer().startAndWait();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+            GenreEnum selectGenre = GenreUtil.convertStringToGenreEnum(genre);
+            String genreName = selectGenre == null ? null : selectGenre.name();
+            int repositoryPage = page * MangaPageSize.MANGA_PAGE_SIZE_4_X_4;
 
-        QueryBuilder queryBuilder = fullTextEntityManager.getSearchFactory()
-                .buildQueryBuilder()
-                .forEntity(Manga.class)
-                .get();
-
-        // Search for mangas with title or author contain keywords
-        Query authorAndTitleQuery = queryBuilder
-                .phrase()
-                .withSlop(5)
-                .onField("title").andField("author")
-                .sentence(searchRequest.getKeywords())
-                .createQuery();
-
-        Query selectedGenreQuery = queryBuilder
-                .phrase()
-                .onField("genres.value")
-                .sentence(searchRequest.getSelectedGenres())
-                .createQuery();
-
-        Query unselectedGenreQuery = queryBuilder
-                .phrase()
-                .onField("genres.value")
-                .sentence(searchRequest.getUnselectedGenres())
-                .createQuery();
-
-        Query query = null;
-
-        if (searchRequest.getKeywords().isEmpty()) {
-            if (searchRequest.getSelectedGenres().isEmpty()) {
-                query = queryBuilder
-                        .bool()
-                        .should(authorAndTitleQuery)
-                        .should(selectedGenreQuery)
-                        .must(unselectedGenreQuery).not()
-                        .createQuery();
-
-            } else {
-                query = queryBuilder
-                        .bool()
-                        .should(authorAndTitleQuery)
-                        .must(selectedGenreQuery)
-                        .must(unselectedGenreQuery).not()
-                        .createQuery();
+            List<Manga> mangas = new ArrayList<>();
+            switch (sortBy) {
+                case "update":
+                    mangas = mangaRepository.getMangaListByGenreSortByUpdate(genreName, repositoryPage,
+                    MangaPageSize.MANGA_PAGE_SIZE_4_X_4);
+                    break;
+                case "top-view":
+                    mangas = mangaRepository.getMangaListByGenreSortByTopView(genreName, repositoryPage,
+                    MangaPageSize.MANGA_PAGE_SIZE_4_X_4);
+                    break;
+                case "top-favorite":
+                    mangas = mangaRepository.getMangaListByGenreSortByTopFavorite(genreName, repositoryPage,
+                    MangaPageSize.MANGA_PAGE_SIZE_4_X_4);
+                    break;
+                default:
+                    break;
             }
 
-        } else if (searchRequest.getSelectedGenres().isEmpty()) {
-            query = queryBuilder
-                    .bool()
-                    .must(authorAndTitleQuery)
-                    .should(selectedGenreQuery)
-                    .must(unselectedGenreQuery).not()
-                    .createQuery();
-
-        } else {
-            query = queryBuilder
-                    .bool()
-                    .must(authorAndTitleQuery)
-                    .must(selectedGenreQuery)
-                    .must(unselectedGenreQuery).not()
-                    .createQuery();
+            int totalPages = (int) Math
+                    .ceil((double) mangaRepository.countMangasByGenre(selectGenre) / MangaPageSize.MANGA_PAGE_SIZE_4_X_4);
+            MangaResponse mangaResponse = new MangaResponse(totalPages, mangas);
+            return mangaResponse;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+            // e.printStackTrace();
         }
-
-        FullTextQuery jpaQuery = fullTextEntityManager.createFullTextQuery(query,
-                Manga.class);
-
-        jpaQuery.setFirstResult(searchRequest.getPage()); // start from the 0th element
-        jpaQuery.setMaxResults(MANGA_PAGE_SIZE_6_X_4); // return 16 elements
-        // total pages of search results
-        int totalPages = (int) Math.ceil(jpaQuery.getResultSize() / MANGA_PAGE_SIZE_6_X_4); 
-
-        List<Manga> results = jpaQuery.getResultList();
-
-        SearchResponse searchResponse = new SearchResponse();
-        searchResponse.setTotalPages(totalPages);
-        searchResponse.setMangas(results);
-        return searchResponse;
     }
+
 }

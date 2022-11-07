@@ -20,13 +20,16 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     User findByEmail(String email);
 
-    @Query("select u.favoriteManga from User u where u.username = :username")
-    List<Manga> getFavoriteMangaByUser(String username);
+    @Query("select u.favoriteManga from User u where u.id = :id")
+    List<Manga> getFavoriteMangaByUserId(long id);
 
     // check if a user has favorited a manga,
     // query return 0 meaning manga is not favorited, return 1 meaning manga is
     // favorited
     @Query("select count(m) from Manga m join m.userFavorites u " +
-            "where m.id = :mangaid and u.username = :username")
-    int isMangaFavoritedByUser(long mangaid, String username);
+            "where m.id = :mangaid and u.id = :userId")
+    int isMangaFavoritedByUser(long mangaid, long userId);
+
+    @Query("select u.password from User u where u.id = :userId")
+    String getPasswordByUserId(long userId);
 }

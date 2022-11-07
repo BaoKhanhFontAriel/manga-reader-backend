@@ -7,17 +7,16 @@ import lombok.NoArgsConstructor;
 import org.hibernate.search.annotations.ContainedIn;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Indexed;
-import org.hibernate.search.annotations.Store;
 
 import javax.persistence.*;
 import java.util.List;
 
 @Entity
 @Data
-@Indexed
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "genre_data")
+@Indexed
 public class Genre {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -27,8 +26,8 @@ public class Genre {
     @Enumerated(EnumType.STRING)
     private GenreEnum genreNum;
 
-    @Field(name="value", store= Store.YES)
-    private String getGenreValue(){
+    @Field( name = "value")
+    private String getGenreValue() {
         return genreNum.getValue();
     }
 

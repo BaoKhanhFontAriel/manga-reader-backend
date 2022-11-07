@@ -1,5 +1,6 @@
 package com.mangapunch.mangareaderbackend.service;
 
+import com.mangapunch.mangareaderbackend.models.RoleEnum;
 import com.mangapunch.mangareaderbackend.models.User;
 import com.mangapunch.mangareaderbackend.security.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +40,7 @@ public class JwtUserDetailService implements UserDetailsService {
 
     private Collection<GrantedAuthority> getGrantedAuthority(User user) {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
-        if (user.getRole().getName().equals("ROLE_ADMIN")) {
+        if (user.getRole().getName().equals(RoleEnum.ROLE_ADMIN)) {
             authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
         }
         else {

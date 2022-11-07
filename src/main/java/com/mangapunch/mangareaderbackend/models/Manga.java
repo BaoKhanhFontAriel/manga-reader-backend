@@ -1,6 +1,10 @@
 package com.mangapunch.mangareaderbackend.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 import lombok.*;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Indexed;
@@ -13,8 +17,9 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Indexed
 @Builder
+@Indexed
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Table(name = "manga_data")
 public class Manga {
     @Id
@@ -48,6 +53,6 @@ public class Manga {
     private String summary;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "manga", cascade = {CascadeType.ALL}, orphanRemoval = true)
+    @OneToMany(mappedBy = "manga", cascade = { CascadeType.ALL }, orphanRemoval = true)
     private List<Chapter> chapters;
 }

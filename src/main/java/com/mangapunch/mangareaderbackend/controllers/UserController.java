@@ -1,117 +1,148 @@
 package com.mangapunch.mangareaderbackend.controllers;
 
+import com.mangapunch.mangareaderbackend.dto.PasswordRequest;
 import com.mangapunch.mangareaderbackend.dto.SignupRequest;
+import com.mangapunch.mangareaderbackend.dto.UserEditRequest;
 import com.mangapunch.mangareaderbackend.models.Chapter;
 import com.mangapunch.mangareaderbackend.models.Manga;
+import com.mangapunch.mangareaderbackend.models.RoleEnum;
 import com.mangapunch.mangareaderbackend.models.User;
 import com.mangapunch.mangareaderbackend.security.UserPrincipal;
 import com.mangapunch.mangareaderbackend.service.ChapterService;
-import com.mangapunch.mangareaderbackend.service.MangaService;
 import com.mangapunch.mangareaderbackend.service.UserService;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.validation.Valid;
-
-import java.security.Principal;
+import javax.annotation.security.RolesAllowed;
 import java.util.List;
-import java.util.Optional;
 
-@RequestMapping("/api/users")
+@RequestMapping("/api/user")
 @RestController
 public class UserController {
 
     @Autowired
     private UserService userService;
-    @Autowired
-    private ModelMapper modelMapper;
-
-    @Autowired
-    private MangaService mangaService;
 
     @Autowired
     private ChapterService chapterService;
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    // get all Users
     @GetMapping("")
-    public String listAllUser(Model model) {
-        model.addAttribute("users", userService.getAllUsers());
-
-        return "users";
-    }
-
-    // get User detail
-    @GetMapping("/{id}")
-    public String showUserDetail(@PathVariable("id") Long UserId) {
-        // model.addAttribute("User", userService.getUserByid(UserId));
-        return "User";
+    @RolesAllowed("ROLE_USER")
+    public ResponseEntity<?> getUserDetail(Authentication auth) {
+        UserPrincipal userPrincipal = (UserPrincipal) auth.getPrincipal();
+        User currentUser = userPrincipal.getUser();
+        try {
+            if (currentUser != null) {
+                return ResponseEntity.status(HttpStatus.OK).body(currentUser);
+            } else {
+                throw new Exception("Không tồn tại user!");
+            }
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 
     // update detail of existed user
-    @PutMapping(value = "/edit/{id}", consumes = { "application/json" })
-    public User editUser(@RequestBody SignupRequest updatedData, @RequestParam("id") Long userId) {
-        User updatedUser = modelMapper.map(updatedData, User.class);
-        if (updatedUser != null) {
-            userService.updateUser(userId, updatedUser);
+    @RolesAllowed("ROLE_USER")
+    @PutMapping(value = "/edit", consumes = { "application/json" })
+    public ResponseEntity<?> editUser(@RequestBody UserEditRequest updatedData, Authentication auth) {
+
+        UserPrincipal userPrincipal = (UserPrincipal) auth.getPrincipal();
+
+        User currentUser = userPrincipal.getUser();
+        try {
+            User user = userService.editUser(currentUser, updatedData);
+
+            return ResponseEntity.status(HttpStatus.OK).body("Cập nhật thành công!");
+
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
-        return userService.findById(userId);
     }
 
     // xử lý request người dùng yêu cầu xóa tài khoản
-    @PreAuthorize("#username == principal.username")
-    @DeleteMapping("/delete/{id}")
-    public void deleteUser(@PathVariable("id") Long UserId) {
-        Optional<User> existedUser = userService.getUserByid(UserId);
-        existedUser.ifPresent((editUser) -> {
-            userService.deleteUser(editUser);
-        });
+    @RolesAllowed("ROLE_USER")
+    @DeleteMapping("/delete")
+    public void deleteUser() {
+        // Optional<User> existedUser = userService.getUserByid(UserId);
+        // existedUser.ifPresent((editUser) -> {
+        // userService.deleteUser(editUser);
+        // });
     }
 
     @GetMapping("/add-favorite")
-    @PreAuthorize("#username == principal.username")
-    public List<Manga> addMangaToFavorite(@RequestParam String username, @RequestParam long mangaid) {
-        return userService.addMangaToFavorite(mangaid, username);
+    @RolesAllowed("ROLE_USER")
+    public List<Manga> addMangaToFavorite(@RequestParam long mangaid, Authentication auth) {
+        UserPrincipal userPrincipal = (UserPrincipal) auth.getPrincipal();
+        User currentUser = userPrincipal.getUser();
+        return userService.addMangaToFavorite(mangaid, currentUser);
     }
 
     @GetMapping("/remove-favorite")
-    @PreAuthorize("#username == principal.username")
-    public List<Manga> removeMangaToFavorite(@RequestParam String username, @RequestParam long mangaid) {
-        return userService.removeMangaToFavorite(mangaid, username);
+    @RolesAllowed("ROLE_USER")
+    public List<Manga> removeMangaToFavorite(@RequestParam long mangaid, Authentication auth) {
+        UserPrincipal userPrincipal = (UserPrincipal) auth.getPrincipal();
+        User currentUser = userPrincipal.getUser();
+        return userService.removeMangaToFavorite(mangaid, currentUser);
     }
 
     // check if the manga is favorited by user
-    @PreAuthorize("#username == principal.username")
+    @RolesAllowed("ROLE_USER")
     @GetMapping("/is-favorited")
-    public boolean isMangaFavoritedByUser(@RequestParam("mangaid") long mangaid,
-            @RequestParam("username") String username) {
-        return userService.isMangaFavoritedByUser(mangaid, username);
+    public boolean isMangaFavoritedByUser(@RequestParam("mangaid") long mangaid, Authentication auth) {
+        UserPrincipal userPrincipal = (UserPrincipal) auth.getPrincipal();
+        User currentUser = userPrincipal.getUser();
+        return userService.isMangaFavoritedByUser(mangaid, currentUser);
     };
 
-    @PreAuthorize("#username == principal.username")
-    @GetMapping("/{username}/favorites")
-    public ResponseEntity<?> getFavoriteMangaByUserId(@PathVariable("username") String username) {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.getFavoriteMangaByUsername(username));
+    @RolesAllowed("ROLE_USER")
+    @GetMapping("/favorites")
+    public ResponseEntity<?> getFavoriteManga(Authentication auth) {
+        UserPrincipal userPrincipal = (UserPrincipal) auth.getPrincipal();
+        User currentUser = userPrincipal.getUser();
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(userService.getFavoriteMangaByUserId(currentUser));
     };
 
-    @PreAuthorize("#username == principal.username")
-    @GetMapping("/{username}/upload-chapters")
-    public List<Chapter> getAllChapterByUsername(@PathVariable("username") String username) {
-        return chapterService.getAllChapterByUsername(username);
+    @GetMapping("/upload-chapters")
+    @RolesAllowed("ROLE_USER")
+    public List<Chapter> getAllUploadedChapter(Authentication auth) {
+        UserPrincipal userPrincipal = (UserPrincipal) auth.getPrincipal();
+        User currentUser = userPrincipal.getUser();
+        return chapterService.getAllUploadedChapters(currentUser);
     };
 
+    @RolesAllowed("ROLE_USER")
+    @PostMapping("/check-password")
+    public boolean isPasswordMatch(@RequestBody PasswordRequest request, Authentication auth) {
+        UserPrincipal userPrincipal = (UserPrincipal) auth.getPrincipal();
+        User currentUser = userPrincipal.getUser();
+        return userService.isPasswordMatch(currentUser, request.getRawPassword());
+    }
+
+    @RolesAllowed("ROLE_USER")
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody PasswordRequest request, Authentication auth) {
+        try {
+            UserPrincipal userPrincipal = (UserPrincipal) auth.getPrincipal();
+            User currentUser = userPrincipal.getUser();
+            userService.editPassword(currentUser, request.getRawPassword());
+            return ResponseEntity.status(HttpStatus.OK).body("Mật khẩu cập nhật thành công!");
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mật khẩu cập nhật không thành công!", e);
+        }
+    }
+
+    @RolesAllowed("ROLE_USER")
+    @GetMapping("/is-admin")
+    public ResponseEntity<?> isAdmin(Authentication auth) {
+        boolean isAdmin = auth.getAuthorities().stream().anyMatch(
+                a -> a.getAuthority().equals(RoleEnum.ROLE_ADMIN.getValue()));
+        return ResponseEntity.status(HttpStatus.OK).body(isAdmin);
+    }
 }

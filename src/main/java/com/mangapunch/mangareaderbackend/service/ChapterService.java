@@ -2,6 +2,8 @@ package com.mangapunch.mangareaderbackend.service;
 
 import com.mangapunch.mangareaderbackend.dto.ChapterRequest;
 import com.mangapunch.mangareaderbackend.models.Chapter;
+import com.mangapunch.mangareaderbackend.models.User;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,12 +25,12 @@ public interface ChapterService {
 
     Chapter findChapterById(long id);
 
-    Chapter addNewChapter(long mangaid, ChapterRequest chapterRequest);
+    Chapter addNewChapter(long mangaid, ChapterRequest chapterRequest, User user);
 
-    Chapter updateChapterDetail(long chapterid, ChapterRequest chapterRequest);
+    Chapter editChapterDetail(long chapterid, ChapterRequest chapterRequest);
 
     String[] getPagesByChapterId(long id);
 
-    List<Chapter> getAllChapterByUsername(String username);
+    List<Chapter> getAllUploadedChapters(User currentUser);
 
 }

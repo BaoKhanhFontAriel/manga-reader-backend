@@ -13,4 +13,8 @@ public class HomeController {
         return "index";
     }
 
+    @GetMapping("/hello")
+    public String home() {
+        return "Hello Docker World";
+    }
 }

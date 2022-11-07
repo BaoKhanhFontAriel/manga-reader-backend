@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
-import org.hibernate.search.annotations.Indexed;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -19,7 +18,6 @@ import java.util.function.BooleanSupplier;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Indexed
 @Table(name = "chapter_data")
 public class Chapter {
     @Id

@@ -1,5 +1,6 @@
 package com.mangapunch.mangareaderbackend.service;
 
+import com.mangapunch.mangareaderbackend.dto.MangaResponse;
 import com.mangapunch.mangareaderbackend.dto.SearchRequest;
 import com.mangapunch.mangareaderbackend.dto.SearchResponse;
 import com.mangapunch.mangareaderbackend.models.Manga;
@@ -32,10 +33,11 @@ public interface MangaService {
 
     String getUpdateDateTimeByMangaId(long mangaid);
 
-    List<Manga> getAllMangaListByUpdate(int page);
+    MangaResponse getAllMangaListByUpdate(int page);
 
     Manga findMangaByChapterId(long chapterId);
 
-    SearchResponse getSearchedMangas(SearchRequest gerGenreRequest);
+    MangaResponse findMangaListByGenreSortBy(String genre, String sortBy, int page);
+
 
 }

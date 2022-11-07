@@ -4,21 +4,19 @@ import com.mangapunch.mangareaderbackend.models.User;
 import com.mangapunch.mangareaderbackend.security.UserPrincipal;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class JwtAuthenticationResponse {
     private String accessToken;
-    private String tokenType = "Bearer";
+
+    private String tokenType;
     private String username;
     private String password;
-    
-    public JwtAuthenticationResponse(String accessToken, String username, String password) {
-        this.accessToken = accessToken;
-        this.username = username;
-        this.password = password;
-    }
+    private long id;
 }

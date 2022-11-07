@@ -1,6 +1,11 @@
 package com.mangapunch.mangareaderbackend.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,7 +13,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
-import org.hibernate.search.annotations.Indexed;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -16,13 +21,15 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Indexed
 @Builder
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @Table(name = "users_data")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    @Column(name = "avatar")
+    private String avatar;
     @Column(name = "fullname")
     private String name;
     @Column(name = "email")
@@ -37,7 +44,8 @@ public class User {
     private List<Chapter> uploadChapters;
 
     @JsonIgnore
-    @ManyToMany(mappedBy = "userFavorites")
+    @ManyToMany(mappedBy = "userFavorites", cascade = {
+            CascadeType.ALL }, fetch = FetchType.EAGER)
     private List<Manga> favoriteManga;
 
     @JsonIgnore
